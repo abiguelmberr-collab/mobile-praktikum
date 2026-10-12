@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import 'course_state.dart';
 
+import 'models/course.dart';
+
 
 
 const String studentName = 'Made Gatan Pytrhsno Penar';
@@ -353,6 +355,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     final courseState = context.watch<CourseState>();
+    final firstCourse = Course.fromJson(courses.first);
     final size = MediaQuery.of(context).size;
 
     final orientation = MediaQuery.of(context).orientation;
@@ -396,6 +399,14 @@ class HomePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
 
               children: [
+                Card(
+                  child: ListTile(
+                    title: Text(firstCourse.title),
+                    subtitle: Text(
+                      '${firstCourse.code} • ${firstCourse.credits} SKS • ${firstCourse.status}',
+                    ),
+                  ),
+                ),
 
                 // =========================
 
