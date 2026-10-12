@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 const String studentName = 'Made Gatan Pytrhsno Penar';
 const String studentId = '2415051118';
@@ -435,7 +436,7 @@ class _CoursesPageState extends State<CoursesPage> {
               crossAxisCount: columnCount,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: constraints.maxWidth < 600 ? 2.0 : 1.4,
+              childAspectRatio: constraints.maxWidth < 600 ? 1.5 : 1.2,
             ),
             itemBuilder: (context, index) {
               final course = courses[index];
@@ -781,6 +782,8 @@ class ProfilePage extends StatelessWidget {
               radius: 55,
               backgroundImage: AssetImage('assets/images/profile.png'),
             ),
+            
+            const FavoriteCounter(),
 
             const SizedBox(height: 16),
 
@@ -986,6 +989,58 @@ class _FeedbackPageState extends State<FeedbackPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class FavoriteCounter extends StatefulWidget {
+  const FavoriteCounter({super.key});
+
+  @override
+  State<FavoriteCounter> createState() => _FavoriteCounterState();
+}
+
+class _FavoriteCounterState extends State<FavoriteCounter> {
+  final ValueNotifier<int> counter = ValueNotifier<int>(0);
+
+  @override
+  void dispose() {
+    counter.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Eksperimen ValueNotifier'),
+            const SizedBox(height: 8),
+            ValueListenableBuilder<int>(
+              valueListenable: counter,
+              builder: (context, value, child) {
+                return Text(
+                  'Jumlah favorit: $value',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () {
+                counter.value++;
+              },
+              child: const Text('Tambah Favorit'),
+            ),
+          ],
         ),
       ),
     );
