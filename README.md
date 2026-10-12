@@ -15,3 +15,23 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+## Struktur Arsitektur Aplikasi
+
+Aplikasi Course Explorer menggunakan pemisahan tanggung jawab (*separation of concerns*) agar kode lebih terstruktur dan mudah dikembangkan.
+
+### Tanggung Jawab Folder
+
+- **models/**: Menyimpan model data Course.
+- **services/**: Mengambil dan memproses data dari sumber data, seperti file JSON.
+- **repositories/**: Menjadi perantara antara Provider dan Service.
+- **providers/**: Mengelola state aplikasi, proses loading, error, dan data course.
+- **screens/**: Menyimpan halaman utama aplikasi.
+- **widgets/**: Menyimpan komponen UI yang dapat digunakan kembali.
+
+### Arah Dependency
+
+Arah dependency aplikasi adalah:
+
+`Screen/Widget → Provider → Repository → Service/Data Source`
+
+Dengan struktur ini, UI tidak mengambil data secara langsung menggunakan `rootBundle` atau `jsonDecode`. Setiap layer memiliki tanggung jawab yang jelas sehingga aplikasi lebih mudah dirawat dan dikembangkan.
