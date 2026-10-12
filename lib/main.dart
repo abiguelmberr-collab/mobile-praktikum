@@ -11,6 +11,11 @@ import 'widgets/course_card.dart';
 
 import 'data/courses.dart';
 
+import 'screens/favorites_page.dart';
+
+import 'providers/course_provider.dart';
+import 'repositories/course_repository.dart';
+import 'services/course_service.dart';
 
 const String studentName = 'Made Gatan Pytrhsno Penar';
 
@@ -18,23 +23,26 @@ const String studentId = '2415051118';
 
 
 
+
+
+
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => CourseState(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => CourseState(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CourseProvider(
+            CourseRepository(CourseService()),
+          )..loadCourses(),
+        ),
+      ],
       child: const MyApp(),
     ),
   );
 }
-
-
-// DATA COURSE
-
-// =========================
-
-
-
-
 
 // =========================
 
@@ -106,7 +114,12 @@ class _MainPageState extends State<MainPage> {
 
 
 
-  final List<Widget> pages = const [HomePage(), CoursesPage(), ProfilePage()];
+  final List<Widget> pages = const [
+  HomePage(),
+  CoursesPage(),
+  ProfilePage(),
+  FavoritesPage(),
+];
 
 
 
@@ -177,6 +190,11 @@ class _MainPageState extends State<MainPage> {
                       label: Text('Profile'),
 
                     ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.favorite_outline),
+                      selectedIcon: Icon(Icons.favorite),
+                      label: Text('Favorites'),
+                    ),
 
                   ],
 
@@ -244,6 +262,12 @@ class _MainPageState extends State<MainPage> {
 
                 label: 'Profile',
 
+              ),
+
+              NavigationDestination(
+                icon: Icon(Icons.favorite_outline),
+                selectedIcon: Icon(Icons.favorite),
+                label: 'Favorites',
               ),
 
             ],

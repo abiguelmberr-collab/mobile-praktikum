@@ -1,13 +1,18 @@
+
 import 'package:flutter/foundation.dart';
 
 class CourseState extends ChangeNotifier {
   final Set<String> favorites = {};
 
-  void toggleFavorite(String id) {
-    if (favorites.contains(id)) {
-      favorites.remove(id);
+  bool isFavorite(String code) {
+    return favorites.contains(code);
+  }
+
+  void toggleFavorite(String code) {
+    if (favorites.contains(code)) {
+      favorites.remove(code);
     } else {
-      favorites.add(id);
+      favorites.add(code);
     }
 
     notifyListeners();
