@@ -513,7 +513,8 @@ class _CoursesPageState extends State<CoursesPage> {
 // COURSE CARD
 // =========================
 
-class CourseCard extends StatelessWidget {
+
+class CourseCard extends StatefulWidget {
   final Map<String, dynamic> course;
   final bool isFavorite;
   final VoidCallback onFavorite;
@@ -530,15 +531,25 @@ class CourseCard extends StatelessWidget {
   });
 
   @override
+  State<CourseCard> createState() => _CourseCardState();
+}
+
+class _CourseCardState extends State<CourseCard> {
+  bool isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
+    final course = widget.course;
+
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        onLongPress: onLongPress,
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -553,9 +564,11 @@ class CourseCard extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: onFavorite,
+                    onPressed: widget.onFavorite,
                     icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      widget.isFavorite
+                          ? Icons.favorite
+                          : Icons.favorite_border,
                     ),
                   ),
                 ],
@@ -574,14 +587,46 @@ class CourseCard extends StatelessWidget {
                   color: course['status'] == 'Selesai'
                       ? Colors.green
                       : course['status'] == 'Aktif'
-                      ? Colors.blue
-                      : Colors.grey,
+                          ? Colors.blue
+                          : Colors.grey,
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
-              const Text('Tap untuk detail', style: TextStyle(fontSize: 12)),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      isExpanded = !isExpanded;
+                    });
+                  },
+                  icon: Icon(
+                    isExpanded
+                        ? Icons.expand_less
+                        : Icons.expand_more,
+                  ),
+                  label: Text(
+                    isExpanded ? 'Sembunyikan detail' : 'Lihat deskripsi',
+                  ),
+                ),
+              ),
+
+              if (isExpanded) ...[
+                const Divider(),
+                Text(
+                  course['description'] ?? 'Tidak ada deskripsi.',
+                  style: const TextStyle(height: 1.4),
+                ),
+              ],
+
+              const SizedBox(height: 4),
+
+              const Text(
+                'Tap kartu untuk membuka halaman detail',
+                style: TextStyle(fontSize: 12),
+              ),
             ],
           ),
         ),
@@ -589,6 +634,7 @@ class CourseCard extends StatelessWidget {
     );
   }
 }
+
 
 // =========================
 // COURSE DETAIL
