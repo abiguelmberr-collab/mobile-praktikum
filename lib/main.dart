@@ -17,6 +17,8 @@ import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'services/course_service.dart';
 
+import 'test_api.dart';
+
 const String studentName = 'Made Gatan Pytrhsno Penar';
 
 const String studentId = '2415051118';
@@ -498,113 +500,98 @@ class HomePage extends StatelessWidget {
 
 
 
+
                 // =========================
-
                 // EXPANDED
-
                 // =========================
 
                 Row(
-
                   children: [
-
                     Expanded(
-
                       flex: 2,
-
                       child: Card(
-
                         child: Padding(
-
                           padding: const EdgeInsets.all(16),
-
                           child: Column(
-
                             crossAxisAlignment: CrossAxisAlignment.start,
-
                             children: [
-
                               const Text(
-
                                 'Progress',
-
-                                style: TextStyle(fontWeight: FontWeight.bold),
-
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-
                               const SizedBox(height: 8),
-
                               const Text('3 / 5 Course'),
-
                               const SizedBox(height: 8),
-
                               LinearProgressIndicator(
-
                                 value: 0.6,
-
                                 borderRadius: BorderRadius.circular(10),
-
                               ),
-
                             ],
-
                           ),
-
                         ),
-
                       ),
-
                     ),
-
-
 
                     const SizedBox(width: 8),
 
-
-
                     Expanded(
-
                       child: Card(
-
                         child: Padding(
-
                           padding: const EdgeInsets.all(16),
-
                           child: Column(
-
                             crossAxisAlignment: CrossAxisAlignment.start,
-
-                            children: const [
-
-                              Text(
-
+                            children: [
+                              const Text(
                                 'Status',
-
-                                style: TextStyle(fontWeight: FontWeight.bold),
-
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
+                              const SizedBox(height: 8),
+                              const Text('Aktif'),
+                              const SizedBox(height: 16),
 
-                              SizedBox(height: 8),
+                              ElevatedButton.icon(
+                                onPressed: () async {
+                                  try {
+                                    final data = await fetchCourses();
 
-                              Text('Aktif'),
+                                    if (!context.mounted) return;
 
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'GET berhasil: ${data.length} data diterima',
+                                        ),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    if (!context.mounted) return;
+
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                      SnackBar(
+                                        content: Text('GET gagal: $e'),
+                                      ),
+                                    );
+                                  }
+                                },
+                                icon: const Icon(Icons.cloud_download),
+                                label: const Text('Tes HTTP GET'),
+                              ),
                             ],
-
                           ),
-
                         ),
-
                       ),
-
                     ),
-
                   ],
-
                 ),
 
-
-
                 const SizedBox(height: 16),
+
 
 
 
