@@ -8,7 +8,6 @@ import 'models/course.dart';
 
 import 'widgets/course_card.dart';
 
-
 import 'data/courses.dart';
 
 import 'screens/favorites_page.dart';
@@ -20,29 +19,24 @@ import 'services/course_api_service.dart';
 import 'test_api.dart';
 import 'widgets/api_courses_section.dart';
 
+import 'widgets/error_view.dart';
+
 const String studentName = 'Made Gatan Pytrhsno Penar';
 
 const String studentId = '2415051118';
-
-
-
-
-
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => CourseState()),
         ChangeNotifierProvider(
-          create: (_) => CourseState(),
+          create: (_) => CourseProvider(
+            CourseRepository(
+              CourseApiService('https://jsonplaceholder.typicode.com'),
+            ),
+          )..loadCourses(),
         ),
-        ChangeNotifierProvider(
-        create: (_) => CourseProvider(
-          CourseRepository(
-            CourseApiService('https://jsonplaceholder.typicode.com'),
-          ),
-        )..loadCourses(),
-      ),
       ],
       child: const MyApp(),
     ),
@@ -55,41 +49,26 @@ void main() {
 
 // =========================
 
-
-
 class MyApp extends StatelessWidget {
-
   const MyApp({super.key});
 
-
-
   @override
-
   Widget build(BuildContext context) {
-
     return MaterialApp(
-
       debugShowCheckedModeBanner: false,
 
       title: 'Course Explorer',
 
       theme: ThemeData(
-
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
 
         useMaterial3: true,
-
       ),
 
       home: const MainPage(),
-
     );
-
   }
-
 }
-
-
 
 // =========================
 
@@ -97,176 +76,119 @@ class MyApp extends StatelessWidget {
 
 // =========================
 
-
-
 class MainPage extends StatefulWidget {
-
   const MainPage({super.key});
 
-
-
   @override
-
   State<MainPage> createState() => _MainPageState();
-
 }
 
-
-
 class _MainPageState extends State<MainPage> {
-
   int selectedIndex = 0;
 
-
-
   final List<Widget> pages = const [
-  HomePage(),
-  CoursesPage(),
-  ProfilePage(),
-  FavoritesPage(),
-];
-
-
+    HomePage(),
+    CoursesPage(),
+    ProfilePage(),
+    FavoritesPage(),
+  ];
 
   @override
-
   Widget build(BuildContext context) {
-
     return LayoutBuilder(
-
       builder: (context, constraints) {
-
         bool isExpanded = constraints.maxWidth >= 840;
 
-
-
         if (isExpanded) {
-
           return Scaffold(
-
             body: Row(
-
               children: [
-
                 NavigationRail(
-
                   selectedIndex: selectedIndex,
 
                   onDestinationSelected: (index) {
-
                     setState(() {
-
                       selectedIndex = index;
-
                     });
-
                   },
 
                   labelType: NavigationRailLabelType.all,
 
                   destinations: const [
-
                     NavigationRailDestination(
-
                       icon: Icon(Icons.home_outlined),
 
                       selectedIcon: Icon(Icons.home),
 
                       label: Text('Home'),
-
                     ),
 
                     NavigationRailDestination(
-
                       icon: Icon(Icons.book_outlined),
 
                       selectedIcon: Icon(Icons.book),
 
                       label: Text('Courses'),
-
                     ),
 
                     NavigationRailDestination(
-
                       icon: Icon(Icons.person_outline),
 
                       selectedIcon: Icon(Icons.person),
 
                       label: Text('Profile'),
-
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.favorite_outline),
                       selectedIcon: Icon(Icons.favorite),
                       label: Text('Favorites'),
                     ),
-
                   ],
-
                 ),
 
                 const VerticalDivider(width: 1),
 
                 Expanded(child: pages[selectedIndex]),
-
               ],
-
             ),
-
           );
-
         }
 
-
-
         return Scaffold(
-
           body: pages[selectedIndex],
 
           bottomNavigationBar: NavigationBar(
-
             selectedIndex: selectedIndex,
 
             onDestinationSelected: (index) {
-
               setState(() {
-
                 selectedIndex = index;
-
               });
-
             },
 
             destinations: const [
-
               NavigationDestination(
-
                 icon: Icon(Icons.home_outlined),
 
                 selectedIcon: Icon(Icons.home),
 
                 label: 'Home',
-
               ),
 
               NavigationDestination(
-
                 icon: Icon(Icons.book_outlined),
 
                 selectedIcon: Icon(Icons.book),
 
                 label: 'Courses',
-
               ),
 
               NavigationDestination(
-
                 icon: Icon(Icons.person_outline),
 
                 selectedIcon: Icon(Icons.person),
 
                 label: 'Profile',
-
               ),
 
               NavigationDestination(
@@ -274,22 +196,13 @@ class _MainPageState extends State<MainPage> {
                 selectedIcon: Icon(Icons.favorite),
                 label: 'Favorites',
               ),
-
             ],
-
           ),
-
         );
-
       },
-
     );
-
   }
-
 }
-
-
 
 // =========================
 
@@ -297,60 +210,35 @@ class _MainPageState extends State<MainPage> {
 
 // =========================
 
-
-
 class HomePage extends StatelessWidget {
-
   const HomePage({super.key});
 
-
-
   @override
-
   Widget build(BuildContext context) {
-
-    final courseState = context.watch<CourseState>();
     final firstCourse = Course.fromJson(courses.first);
     final size = MediaQuery.of(context).size;
 
     final orientation = MediaQuery.of(context).orientation;
 
-
-
     return Scaffold(
-
       appBar: AppBar(title: const Text('Course Explorer')),
 
       body: LayoutBuilder(
-
         builder: (context, constraints) {
-
           String layout;
 
-
-
           if (constraints.maxWidth < 600) {
-
             layout = 'Compact';
-
           } else if (constraints.maxWidth < 840) {
-
             layout = 'Medium';
-
           } else {
-
             layout = 'Expanded';
-
           }
 
-
-
           return SingleChildScrollView(
-
             padding: const EdgeInsets.all(16),
 
             child: Column(
-
               crossAxisAlignment: CrossAxisAlignment.start,
 
               children: [
@@ -368,111 +256,71 @@ class HomePage extends StatelessWidget {
                 // PROFILE
 
                 // =========================
-
-
-
                 Card(
-
                   child: Padding(
-
                     padding: const EdgeInsets.all(16),
 
                     child: Row(
-
                       children: [
-
                         const CircleAvatar(
-
                           radius: 38,
 
                           backgroundImage: AssetImage(
-
                             'assets/images/profile.png',
-
                           ),
-
                         ),
 
                         const SizedBox(width: 16),
 
-
-
                         Expanded(
-
                           child: Column(
-
                             crossAxisAlignment: CrossAxisAlignment.start,
 
                             children: [
-
                               Text(
-
                                 studentName,
 
                                 style: const TextStyle(
-
                                   fontSize: 18,
 
                                   fontWeight: FontWeight.bold,
-
                                 ),
-
                               ),
 
                               const SizedBox(height: 4),
 
                               Text('NIM: $studentId'),
-
                             ],
-
                           ),
-
                         ),
-
                       ],
-
                     ),
-
                   ),
-
                 ),
 
-
-
                 const SizedBox(height: 16),
-
-
 
                 // =========================
 
                 // MEDIA QUERY
 
                 // =========================
-
                 Card(
-
                   child: Padding(
-
                     padding: const EdgeInsets.all(16),
 
                     child: Column(
-
                       crossAxisAlignment: CrossAxisAlignment.start,
 
                       children: [
-
                         const Text(
-
                           'Informasi Layar',
 
                           style: TextStyle(
-
                             fontSize: 16,
 
                             fontWeight: FontWeight.bold,
-
                           ),
-
                         ),
 
                         const SizedBox(height: 8),
@@ -488,26 +336,16 @@ class HomePage extends StatelessWidget {
                         Text('Orientation: $orientation'),
 
                         Text('Layout: $layout'),
-
                       ],
-
                     ),
-
                   ),
-
                 ),
 
-
-
                 const SizedBox(height: 16),
-
-
-
 
                 // =========================
                 // EXPANDED
                 // =========================
-
                 Row(
                   children: [
                     Expanded(
@@ -520,9 +358,7 @@ class HomePage extends StatelessWidget {
                             children: [
                               const Text(
                                 'Progress',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
                               const Text('3 / 5 Course'),
@@ -548,9 +384,7 @@ class HomePage extends StatelessWidget {
                             children: [
                               const Text(
                                 'Status',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
                               const Text('Aktif'),
@@ -563,8 +397,7 @@ class HomePage extends StatelessWidget {
 
                                     if (!context.mounted) return;
 
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
                                           'GET berhasil: ${data.length} data diterima',
@@ -574,11 +407,8 @@ class HomePage extends StatelessWidget {
                                   } catch (e) {
                                     if (!context.mounted) return;
 
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                      SnackBar(
-                                        content: Text('GET gagal: $e'),
-                                      ),
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('GET gagal: $e')),
                                     );
                                   }
                                 },
@@ -595,169 +425,116 @@ class HomePage extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-
-
-
                 // =========================
 
                 // WRAP
 
                 // =========================
-
                 const Text(
-
                   'Skill',
 
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-
                 ),
-
-
 
                 const SizedBox(height: 8),
 
-
-
                 Wrap(
-
                   spacing: 8,
 
                   runSpacing: 8,
 
                   children: const [
-
                     Chip(
-
                       avatar: Icon(Icons.code, size: 18),
 
                       label: Text('Flutter'),
-
                     ),
 
                     Chip(
-
                       avatar: Icon(Icons.code, size: 18),
 
                       label: Text('Dart'),
-
                     ),
 
                     Chip(
-
                       avatar: Icon(Icons.storage, size: 18),
 
                       label: Text('Git'),
-
                     ),
 
                     Chip(
-
                       avatar: Icon(Icons.design_services, size: 18),
 
                       label: Text('UI Design'),
-
                     ),
 
                     Chip(
-
                       avatar: Icon(Icons.devices, size: 18),
 
                       label: Text('Responsive'),
-
                     ),
 
                     Chip(
-
                       avatar: Icon(Icons.cloud, size: 18),
 
                       label: Text('Firebase'),
-
                     ),
-
                   ],
-
                 ),
-
-
 
                 const SizedBox(height: 20),
                 const ApiCoursesSection(),
                 const SizedBox(height: 16),
 
-// COURSE SAYA
-
-
+                // COURSE SAYA
 
                 // =========================
 
                 // COURSE SAYA
 
                 // =========================
-
                 const Text(
-
                   'Course Saya',
 
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-
                 ),
-
-
 
                 const SizedBox(height: 8),
 
-
-
                 for (final course in courses.take(3))
-
                   CourseCard(
-
                     course: course,
 
-                    isFavorite: courseState.favorites.contains(course['code']),
+                    isFavorite: context.watch<CourseState>().favorites.contains(
+                      course['code'] as String,
+                    ),
                     onFavorite: () {
-                      context.read<CourseState>().toggleFavorite(course['code'] as String);
+                      context.read<CourseState>().toggleFavorite(
+                        course['code'] as String,
+                      );
                     },
 
                     onTap: () {
-
                       Navigator.push(
-
                         context,
 
                         MaterialPageRoute(
-
                           builder: (context) =>
-
                               CourseDetailPage(course: course),
-
                         ),
-
                       );
-
                     },
 
                     onLongPress: () {},
-
                   ),
-
               ],
-
             ),
-
           );
-
         },
-
       ),
-
     );
-
   }
-
 }
-
-
 
 // =========================
 
@@ -765,94 +542,120 @@ class HomePage extends StatelessWidget {
 
 // =========================
 
-
-
 class CoursesPage extends StatefulWidget {
-
   const CoursesPage({super.key});
 
-
-
   @override
-
   State<CoursesPage> createState() => _CoursesPageState();
-
 }
-
-
 
 class _CoursesPageState extends State<CoursesPage> {
   @override
   Widget build(BuildContext context) {
-    final courseState = context.watch<CourseState>();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Daftar Course')),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          int columnCount;
-          if (constraints.maxWidth < 600) {
-            columnCount = 1;
-          } else if (constraints.maxWidth < 840) {
-            columnCount = 2;
-          } else {
-            columnCount = 3;
+      body: Builder(
+        builder: (context) {
+          final apiState = context.watch<CourseProvider>();
+
+          if (apiState.isLoading) {
+            return const Center(child: CircularProgressIndicator());
           }
 
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: courses.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columnCount,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: constraints.maxWidth < 600 ? 1.5 : 1.2,
-            ),
-            itemBuilder: (context, index) {
-              final course = courses[index];
-              final code = course['code'] as String;
+          if (apiState.error != null) {
+            return ErrorView(
+              message: apiState.error!,
+              onRetry: apiState.loadCourses,
+            );
+          }
 
-              return CourseCard(
-                course: course,
-                isFavorite: courseState.favorites.contains(code),
-                onFavorite: () {
-                  context.read<CourseState>().toggleFavorite(code);
-                  final isFavorite = context.read<CourseState>().favorites.contains(code);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        isFavorite
-                            ? '${course['title']} ditambahkan ke favorit'
-                            : '${course['title']} dihapus dari favorit',
-                      ),
+          if (apiState.courses.isEmpty) {
+            return const Center(child: Text('Data course belum tersedia'));
+          }
+
+          final apiCourses = apiState.courses;
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final columnCount = constraints.maxWidth < 600
+                  ? 1
+                  : constraints.maxWidth < 840
+                  ? 2
+                  : 3;
+
+              final courseMaps = apiCourses.map((course) {
+                return <String, dynamic>{
+                  'id': course.id,
+                  'code': course.code,
+                  'title': course.title,
+                  'credits': course.credits,
+                  'status': course.status,
+                };
+              }).toList();
+
+              return GridView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: courseMaps.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columnCount,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: constraints.maxWidth < 600 ? 1.5 : 1.2,
+                ),
+                itemBuilder: (context, index) {
+                  final course = courseMaps[index];
+                  final code = course['code'] as String;
+
+                  return CourseCard(
+                    course: course,
+                    isFavorite: context.watch<CourseState>().favorites.contains(
+                      code,
                     ),
-                  );
-                },
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CourseDetailPage(course: course),
-                    ),
-                  );
-                },
-                onLongPress: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(course['title']),
-                      content: Text(
-                        'Kode: ${course['code']}\n'
-                        'SKS: ${course['credits']}\n'
-                        'Status: ${course['status']}',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Tutup'),
+                    onFavorite: () {
+                      context.read<CourseState>().toggleFavorite(code);
+
+                      final isFavorite = context
+                          .read<CourseState>()
+                          .favorites
+                          .contains(code);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            isFavorite
+                                ? '${course['title']} ditambahkan ke favorit'
+                                : '${course['title']} dihapus dari favorit',
+                          ),
                         ),
-                      ],
-                    ),
+                      );
+                    },
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CourseDetailPage(course: course),
+                        ),
+                      );
+                    },
+                    onLongPress: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text(course['title'].toString()),
+                          content: Text(
+                            'Kode: ${course['code']}\n'
+                            'SKS: ${course['credits']}\n'
+                            'Status: ${course['status']}',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Tutup'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   );
                 },
               );
@@ -864,17 +667,11 @@ class _CoursesPageState extends State<CoursesPage> {
   }
 }
 
-
 // =========================
 
 // COURSE CARD
 
 // =========================
-
-
-
-
-
 
 // =========================
 
@@ -882,25 +679,14 @@ class _CoursesPageState extends State<CoursesPage> {
 
 // =========================
 
-
-
 class CourseDetailPage extends StatefulWidget {
-
   final Map<String, dynamic> course;
-
-
 
   const CourseDetailPage({super.key, required this.course});
 
-
-
   @override
-
   State<CourseDetailPage> createState() => _CourseDetailPageState();
-
 }
-
-
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
   @override
@@ -916,7 +702,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           IconButton(
             onPressed: () {
               context.read<CourseState>().toggleFavorite(code);
-              final nowFavorite = context.read<CourseState>().favorites.contains(code);
+              final nowFavorite = context
+                  .read<CourseState>()
+                  .favorites
+                  .contains(code);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -970,68 +759,44 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   }
 }
 
-
 // =========================
 
 // INFO ROW
 
 // =========================
 
-
-
 class InfoRow extends StatelessWidget {
-
   final String title;
 
   final String value;
 
-
-
   const InfoRow({super.key, required this.title, required this.value});
 
-
-
   @override
-
   Widget build(BuildContext context) {
-
     return Padding(
-
       padding: const EdgeInsets.only(bottom: 10),
 
       child: Row(
-
         crossAxisAlignment: CrossAxisAlignment.start,
 
         children: [
-
           SizedBox(
-
             width: 80,
 
             child: Text(
-
               title,
 
               style: const TextStyle(fontWeight: FontWeight.bold),
-
             ),
-
           ),
 
           Expanded(child: Text(value)),
-
         ],
-
       ),
-
     );
-
   }
-
 }
-
-
 
 // =========================
 
@@ -1039,76 +804,45 @@ class InfoRow extends StatelessWidget {
 
 // =========================
 
-
-
 class ProfilePage extends StatelessWidget {
-
   const ProfilePage({super.key});
 
-
-
   @override
-
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       appBar: AppBar(title: const Text('Profile')),
 
       body: SingleChildScrollView(
-
         padding: const EdgeInsets.all(20),
 
         child: Column(
-
           children: [
-
             const CircleAvatar(
-
               radius: 55,
 
               backgroundImage: AssetImage('assets/images/profile.png'),
-
             ),
-
-
 
             const FavoriteCounter(),
 
-
-
             const SizedBox(height: 16),
 
-
-
             Text(
-
               studentName,
 
               textAlign: TextAlign.center,
 
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-
             ),
-
-
 
             const SizedBox(height: 6),
 
-
-
             Text('NIM: $studentId', style: const TextStyle(fontSize: 16)),
-
-
 
             const SizedBox(height: 30),
 
-
-
             Card(
-
               child: ListTile(
-
                 leading: const Icon(Icons.feedback),
 
                 title: const Text('Feedback'),
@@ -1118,53 +852,33 @@ class ProfilePage extends StatelessWidget {
                 trailing: const Icon(Icons.arrow_forward_ios),
 
                 onTap: () {
-
                   Navigator.push(
-
                     context,
 
                     MaterialPageRoute(
-
                       builder: (context) => const FeedbackPage(),
-
                     ),
-
                   );
-
                 },
-
               ),
-
             ),
-
-
 
             const SizedBox(height: 20),
 
-
-
             const Text(
-
               'Skill Saya',
 
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-
             ),
-
-
 
             const SizedBox(height: 10),
 
-
-
             Wrap(
-
               spacing: 8,
 
               runSpacing: 8,
 
               children: const [
-
                 Chip(label: Text('Flutter')),
 
                 Chip(label: Text('Dart')),
@@ -1176,24 +890,14 @@ class ProfilePage extends StatelessWidget {
                 Chip(label: Text('Firebase')),
 
                 Chip(label: Text('Responsive')),
-
               ],
-
             ),
-
           ],
-
         ),
-
       ),
-
     );
-
   }
-
 }
-
-
 
 // =========================
 
@@ -1201,48 +905,26 @@ class ProfilePage extends StatelessWidget {
 
 // =========================
 
-
-
 class FeedbackPage extends StatefulWidget {
-
   const FeedbackPage({super.key});
 
-
-
   @override
-
   State<FeedbackPage> createState() => _FeedbackPageState();
-
 }
 
-
-
 class _FeedbackPageState extends State<FeedbackPage> {
-
   final _formKey = GlobalKey<FormState>();
-
-
 
   final nameController = TextEditingController(text: studentName);
 
-
-
   final nimController = TextEditingController(text: studentId);
-
-
 
   final commentController = TextEditingController();
 
-
-
   bool isLoading = false;
 
-
-
   @override
-
   void dispose() {
-
     nameController.dispose();
 
     nimController.dispose();
@@ -1250,351 +932,213 @@ class _FeedbackPageState extends State<FeedbackPage> {
     commentController.dispose();
 
     super.dispose();
-
   }
 
-
-
   void submitFeedback() async {
-
     if (!_formKey.currentState!.validate()) {
-
       return;
-
     }
 
-
-
     setState(() {
-
       isLoading = true;
-
     });
-
-
 
     await Future.delayed(const Duration(seconds: 1));
 
-
-
     if (!mounted) return;
 
-
-
     setState(() {
-
       isLoading = false;
-
     });
 
-
-
     showDialog(
-
       context: context,
 
       builder: (context) {
-
         return AlertDialog(
-
           title: const Text('Feedback Terkirim'),
 
           content: const Text('Terima kasih, feedback berhasil dikirim.'),
 
           actions: [
-
             TextButton(
-
               onPressed: () {
-
                 Navigator.pop(context);
-
               },
 
               child: const Text('OK'),
-
             ),
-
           ],
-
         );
-
       },
-
     );
 
-
-
     ScaffoldMessenger.of(
-
       context,
-
     ).showSnackBar(const SnackBar(content: Text('Feedback berhasil disimpan')));
-
   }
 
-
-
   @override
-
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       appBar: AppBar(title: const Text('Feedback')),
 
       body: SingleChildScrollView(
-
         padding: const EdgeInsets.all(20),
 
         child: Form(
-
           key: _formKey,
 
           child: Column(
-
             children: [
-
               TextFormField(
-
                 controller: nameController,
 
                 decoration: const InputDecoration(
-
                   labelText: 'Nama',
 
                   border: OutlineInputBorder(),
-
                 ),
 
                 validator: (value) {
-
                   if (value == null || value.isEmpty) {
-
                     return 'Nama wajib diisi';
-
                   }
 
                   return null;
-
                 },
-
               ),
-
-
 
               const SizedBox(height: 16),
 
-
-
               TextFormField(
-
                 controller: nimController,
 
                 decoration: const InputDecoration(
-
                   labelText: 'NIM',
 
                   border: OutlineInputBorder(),
-
                 ),
 
                 validator: (value) {
-
                   if (value == null || value.isEmpty) {
-
                     return 'NIM wajib diisi';
-
                   }
 
                   return null;
-
                 },
-
               ),
-
-
 
               const SizedBox(height: 16),
 
-
-
               TextFormField(
-
                 controller: commentController,
 
                 maxLines: 5,
 
                 decoration: const InputDecoration(
-
                   labelText: 'Komentar',
 
                   hintText: 'Tulis feedback minimal 5 karakter',
 
                   border: OutlineInputBorder(),
-
                 ),
 
                 validator: (value) {
-
                   if (value == null || value.trim().length < 5) {
-
                     return 'Komentar minimal 5 karakter';
-
                   }
 
                   return null;
-
                 },
-
               ),
-
-
 
               const SizedBox(height: 20),
 
-
-
               SizedBox(
-
                 width: double.infinity,
 
                 child: ElevatedButton(
-
                   onPressed: isLoading ? null : submitFeedback,
 
                   child: isLoading
-
                       ? const SizedBox(
-
                           height: 22,
 
                           width: 22,
 
                           child: CircularProgressIndicator(strokeWidth: 2),
-
                         )
-
                       : const Text('Kirim Feedback'),
-
                 ),
-
               ),
-
             ],
-
           ),
-
         ),
-
       ),
-
     );
-
   }
-
 }
-
-
 
 class FavoriteCounter extends StatefulWidget {
-
   const FavoriteCounter({super.key});
 
-
-
   @override
-
   State<FavoriteCounter> createState() => _FavoriteCounterState();
-
 }
 
-
-
 class _FavoriteCounterState extends State<FavoriteCounter> {
-
   final ValueNotifier<int> counter = ValueNotifier<int>(0);
 
-
-
   @override
-
   void dispose() {
-
     counter.dispose();
 
     super.dispose();
-
   }
 
-
-
   @override
-
   Widget build(BuildContext context) {
-
     return Card(
-
       child: Padding(
-
         padding: const EdgeInsets.all(16),
 
         child: Column(
-
           mainAxisSize: MainAxisSize.min,
 
           children: [
-
             const Text('Eksperimen ValueNotifier'),
 
             const SizedBox(height: 8),
 
             ValueListenableBuilder<int>(
-
               valueListenable: counter,
 
               builder: (context, value, child) {
-
                 return Text(
-
                   'Jumlah favorit: $value',
 
                   style: const TextStyle(
-
                     fontSize: 20,
 
                     fontWeight: FontWeight.bold,
-
                   ),
-
                 );
-
               },
-
             ),
 
             const SizedBox(height: 8),
 
             ElevatedButton(
-
               onPressed: () {
-
                 counter.value++;
-
               },
 
               child: const Text('Tambah Favorit'),
-
             ),
-
           ],
-
         ),
-
       ),
-
     );
-
   }
-
 }
