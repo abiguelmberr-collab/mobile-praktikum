@@ -653,12 +653,101 @@ class _CoursesPageState extends State<CoursesPage> {
                       );
                     },
                     onLongPress: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CourseFormPage(
-                            course: apiState.courses[index],
+                      showDialog(
+                        context: context,
+                        builder: (dialogContext) => AlertDialog(
+                          title: Text(course['title'].toString()),
+                          content: Text(
+                            'Kode: ${course['code']}\n'
+                            'SKS: ${course['credits']}\n'
+                            'Status: ${course['status']}',
                           ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(dialogContext),
+                              child: const Text('Tutup'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(dialogContext);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => CourseFormPage(
+                                      course: apiCourses[index],
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: const Text('Edit'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                Navigator.pop(dialogContext);
+
+                                final confirmed = await showDialog<bool>(
+                                  context: context,
+                                  builder: (confirmContext) => AlertDialog(
+                                    title: const Text('Hapus Course?'),
+                                    content: Text(
+                                      'Yakin ingin menghapus ${course['title']}?',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(
+                                          confirmContext,
+                                          false,
+                                        ),
+                                        child: const Text('Batal'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(confirmContext, true),
+                                        child: const Text('Hapus'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+
+                                if (confirmed != true || !context.mounted) {
+                                  return;
+                                }
+                                final id = course['id'] as int?;
+                                if (id == null) {
+                                  return;
+                                }
+
+                                try {
+                                  await context
+                                      .read<CourseProvider>()
+                                      .deleteCourse(id);
+
+                                  if (!context.mounted) return;
+
+                                  context.read<CourseState>().removeFavorite(
+                                    course['code'] as String,
+                                  );
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Course berhasil dihapus!'),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  if (!context.mounted) return;
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Gagal menghapus course: $e',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: const Text('Hapus'),
+                            ),
+                          ],
                         ),
                       );
                     },
