@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +6,7 @@ import '../constants/student_info.dart';
 import '../providers/course_provider.dart';
 import '../widgets/course_card.dart';
 import 'course_detail_page.dart';
+import 'course_form_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -21,21 +21,20 @@ class HomePage extends StatelessWidget {
 
     // Konversi model Course menjadi Map agar cocok dengan CourseCard
     // dan CourseDetailPage yang sudah ada.
-    final List<Map<String, dynamic>> courseList =
-        courseProvider.courses.map<Map<String, dynamic>>((course) {
-      return <String, dynamic>{
-        'code': course.code,
-        'title': course.title,
-        'credits': course.credits,
-        'status': course.status,
-        'description': '',
-      };
-    }).toList();
+    final List<Map<String, dynamic>> courseList = courseProvider.courses
+        .map<Map<String, dynamic>>((course) {
+          return <String, dynamic>{
+            'code': course.code,
+            'title': course.title,
+            'credits': course.credits,
+            'status': course.status,
+            'description': '',
+          };
+        })
+        .toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Course Explorer'),
-      ),
+      appBar: AppBar(title: const Text('Course Explorer')),
       body: LayoutBuilder(
         builder: (context, constraints) {
           String layout;
@@ -78,18 +77,14 @@ class HomePage extends StatelessWidget {
                         children: [
                           const Text(
                             'Gagal memuat data course',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 8),
                           Text(courseProvider.error!),
                           const SizedBox(height: 8),
                           ElevatedButton.icon(
                             onPressed: () {
-                              context
-                                  .read<CourseProvider>()
-                                  .loadCourses();
+                              context.read<CourseProvider>().loadCourses();
                             },
                             icon: const Icon(Icons.refresh),
                             label: const Text('Coba Lagi'),
@@ -197,9 +192,7 @@ class HomePage extends StatelessWidget {
                             children: [
                               const Text(
                                 'Progress',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 8),
                               Text(
@@ -210,11 +203,14 @@ class HomePage extends StatelessWidget {
                               LinearProgressIndicator(
                                 value: courseList.isEmpty
                                     ? 0
-                                    : courseList.where(
-                                        (course) =>
-                                            course['status'] == 'Selesai',
-                                      ).length /
-                                        courseList.length,
+                                    : courseList
+                                              .where(
+                                                (course) =>
+                                                    course['status'] ==
+                                                    'Selesai',
+                                              )
+                                              .length /
+                                          courseList.length,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ],
@@ -232,9 +228,7 @@ class HomePage extends StatelessWidget {
                             children: [
                               Text(
                                 'Status',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 8),
                               Text('Aktif'),
@@ -251,10 +245,7 @@ class HomePage extends StatelessWidget {
                 // SKILL
                 const Text(
                   'Skill',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 const Wrap(
@@ -291,12 +282,29 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // DAFTAR COURSE DARI PROVIDER
-                const Text(
-                  'Course Saya',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Course Saya',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CourseFormPage(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text('Tambah'),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
 
@@ -322,16 +330,14 @@ class HomePage extends StatelessWidget {
                       ),
                       onFavorite: () {
                         context.read<CourseState>().toggleFavorite(
-                              course['code'] as String,
-                            );
+                          course['code'] as String,
+                        );
                       },
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => CourseDetailPage(
-                              course: course,
-                            ),
+                            builder: (_) => CourseDetailPage(course: course),
                           ),
                         );
                       },

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'course_state.dart';
-
+import 'screens/course_form_page.dart';
 import 'models/course.dart';
 
 import 'widgets/course_card.dart';
@@ -553,7 +553,22 @@ class _CoursesPageState extends State<CoursesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Daftar Course')),
+      appBar: AppBar(
+        title: const Text('Daftar Course'),
+        actions: [
+          IconButton(
+            tooltip: 'Tambah Course',
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CourseFormPage()),
+              );
+            },
+          ),
+        ],
+      ),
+
       body: Builder(
         builder: (context) {
           final apiState = context.watch<CourseProvider>();

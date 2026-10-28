@@ -1,5 +1,5 @@
-
 import 'package:flutter/foundation.dart';
+
 import '../models/course.dart';
 import '../repositories/course_repository.dart';
 
@@ -10,6 +10,7 @@ class CourseProvider extends ChangeNotifier {
 
   List<Course> courses = [];
   bool isLoading = false;
+  bool isSaving = false;
   String? error;
 
   Future<void> loadCourses() async {
@@ -23,6 +24,23 @@ class CourseProvider extends ChangeNotifier {
       error = e.toString();
     } finally {
       isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> createCourse(Course course) async {
+    isSaving = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      await repository.createCourse(course);
+      await loadCourses();
+    } catch (e) {
+      error = e.toString();
+      rethrow;
+    } finally {
+      isSaving = false;
       notifyListeners();
     }
   }

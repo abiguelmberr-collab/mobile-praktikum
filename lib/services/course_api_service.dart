@@ -10,18 +10,13 @@ class CourseApiService {
   final String baseUrl;
 
   Future<List<Course>> getCourses() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/posts'),
-    );
+    final response = await http.get(Uri.parse('$baseUrl/posts'));
 
     if (response.statusCode != 200) {
-      throw Exception(
-        'Gagal mengambil course: HTTP ${response.statusCode}',
-      );
+      throw Exception('Gagal mengambil course: HTTP ${response.statusCode}');
     }
 
-    final List<dynamic> data =
-        jsonDecode(response.body) as List<dynamic>;
+    final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
 
     return data.map((item) {
       final post = item as Map<String, dynamic>;
@@ -34,5 +29,31 @@ class CourseApiService {
         'status': 'planned',
       });
     }).toList();
+  }
+
+  Future<Course> createCourse(Course course) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/posts'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'title': course.title,
+        'body': course.code,
+        'userId': 1,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      return Course(
+        id: data['id'] as int?,
+        code: course.code,
+        title: course.title,
+        credits: course.credits,
+        status: course.status,
+      );
+    }
+
+    throw Exception('Gagal membuat course');
   }
 }
