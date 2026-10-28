@@ -44,4 +44,20 @@ class CourseProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+    Future<void> updateCourse(int id, Course course) async {
+    isSaving = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      await repository.updateCourse(id, course);
+      await loadCourses();
+    } catch (e) {
+      error = e.toString();
+      rethrow;
+    } finally {
+      isSaving = false;
+      notifyListeners();
+    }
+  }
 }

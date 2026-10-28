@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,7 +5,9 @@ import '../models/course.dart';
 import '../providers/course_provider.dart';
 
 class CourseFormPage extends StatefulWidget {
-  const CourseFormPage({super.key});
+  final Course? course;
+
+  const CourseFormPage({super.key, this.course});
 
   @override
   State<CourseFormPage> createState() => _CourseFormPageState();
@@ -29,48 +30,71 @@ class _CourseFormPageState extends State<CourseFormPage> {
     super.dispose();
   }
 
-  
-Future<void> _submit() async {
-  if (!_formKey.currentState!.validate()) return;
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
 
-  final course = Course(
-    code: _codeController.text.trim(),
-    title: _titleController.text.trim(),
-    credits: int.parse(_creditsController.text.trim()),
-    status: _status,
-  );
+    final existingCourse = widget.course;
 
-  setState(() => _isSubmitting = true);
-
-  final provider = context.read<CourseProvider>();
-
-  try {
-    await provider.createCourse(course);
-
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Course berhasil dibuat!')),
+    final course = Course(
+      id: existingCourse?.id,
+      code: _codeController.text.trim(),
+      title: _titleController.text.trim(),
+      credits: int.parse(_creditsController.text.trim()),
+      status: _status,
     );
-    Navigator.pop(context);
-  } catch (e) {
-    if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Gagal membuat course: $e')),
-    );
-  } finally {
-    if (mounted) {
-      setState(() => _isSubmitting = false);
+    setState(() => _isSubmitting = true);
+
+    final provider = context.read<CourseProvider>();
+
+    try {
+      if (existingCourse == null) {
+        await provider.createCourse(course);
+      } else {
+        if (existingCourse.id == null) {
+          throw Exception('ID course tidak tersedia');
+        }
+        await provider.updateCourse(existingCourse.id!, course);
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            existingCourse == null
+                ? 'Course berhasil dibuat!'
+                : 'Course berhasil diperbarui!',
+          ),
+        ),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            existingCourse == null
+                ? 'Gagal membuat course: $e'
+                : 'Gagal memperbarui course: $e',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tambah Course')),
+      appBar: AppBar(
+        title: Text(widget.course == null ? 'Tambah Course' : 'Edit Course'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -83,10 +107,9 @@ Future<void> _submit() async {
                   labelText: 'Kode Course',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty
-                        ? 'Kode course wajib diisi'
-                        : null,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Kode course wajib diisi'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -95,14 +118,14 @@ Future<void> _submit() async {
                   labelText: 'Judul Course',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty
-                        ? 'Judul course wajib diisi'
-                        : null,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Judul course wajib diisi'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _creditsController,
+                readOnly: widget.course != null,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Credits',
@@ -119,32 +142,23 @@ Future<void> _submit() async {
                 },
               ),
               const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  initialValue: _status,
-                  decoration: const InputDecoration(
-                    labelText: 'Status',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'planned',
-                      child: Text('Planned'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'active',
-                      child: Text('Active'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'done',
-                      child: Text('Done'),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => _status = value);
-                    }
-                  },
+              DropdownButtonFormField<String>(
+                initialValue: _status,
+                decoration: const InputDecoration(
+                  labelText: 'Status',
+                  border: OutlineInputBorder(),
                 ),
+                items: const [
+                  DropdownMenuItem(value: 'planned', child: Text('Planned')),
+                  DropdownMenuItem(value: 'active', child: Text('Active')),
+                  DropdownMenuItem(value: 'done', child: Text('Done')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _status = value);
+                  }
+                },
+              ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isSubmitting ? null : _submit,
@@ -157,5 +171,19 @@ Future<void> _submit() async {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    final course = widget.course;
+
+    if (course != null) {
+      _codeController.text = course.code;
+      _titleController.text = course.title;
+      _creditsController.text = course.credits.toString();
+      _status = course.status;
+    }
   }
 }

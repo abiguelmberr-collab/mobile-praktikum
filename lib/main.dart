@@ -653,21 +653,12 @@ class _CoursesPageState extends State<CoursesPage> {
                       );
                     },
                     onLongPress: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text(course['title'].toString()),
-                          content: Text(
-                            'Kode: ${course['code']}\n'
-                            'SKS: ${course['credits']}\n'
-                            'Status: ${course['status']}',
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CourseFormPage(
+                            course: apiState.courses[index],
                           ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Tutup'),
-                            ),
-                          ],
                         ),
                       );
                     },
