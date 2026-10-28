@@ -18,6 +18,7 @@ import 'repositories/course_repository.dart';
 import 'services/course_service.dart';
 
 import 'test_api.dart';
+import 'widgets/api_courses_section.dart';
 
 const String studentName = 'Made Gatan Pytrhsno Penar';
 
@@ -678,6 +679,10 @@ class HomePage extends StatelessWidget {
 
 
                 const SizedBox(height: 20),
+                const ApiCoursesSection(),
+                const SizedBox(height: 16),
+
+// COURSE SAYA
 
 
 

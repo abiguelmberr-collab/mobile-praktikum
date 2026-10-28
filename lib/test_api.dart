@@ -1,23 +1,31 @@
-
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'models/course.dart';
 
-const String apiUrl =
-    'https://jsonplaceholder.typicode.com/posts';
+const String apiUrl = 'https://jsonplaceholder.typicode.com/posts';
 
-Future<List<dynamic>> fetchCourses() async {
+Future<List<Course>> fetchCourses() async {
   final response = await http.get(Uri.parse(apiUrl));
 
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body) as List<dynamic>;
+    final List<dynamic> jsonList =
+        jsonDecode(response.body) as List<dynamic>;
 
-    debugPrint('GET berhasil');
-    debugPrint('Status code: ${response.statusCode}');
-    debugPrint('Jumlah data: ${data.length}');
+    return jsonList.map((item) {
+      final post = item as Map<String, dynamic>;
 
-    return data;
+      // Memetakan field dari JSONPlaceholder ke model Course.
+      final courseJson = <String, dynamic>{
+        'id': post['id'],
+        'code': 'POST-${post['id']}',
+        'title': post['title'],
+        'credits': 3,
+        'status': 'planned',
+      };
+
+      return Course.fromJson(courseJson);
+    }).toList();
   }
 
   throw Exception('HTTP ${response.statusCode}');
