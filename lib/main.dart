@@ -15,7 +15,7 @@ import 'screens/favorites_page.dart';
 
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
-import 'services/course_service.dart';
+import 'services/course_api_service.dart';
 
 import 'test_api.dart';
 import 'widgets/api_courses_section.dart';
@@ -37,10 +37,12 @@ void main() {
           create: (_) => CourseState(),
         ),
         ChangeNotifierProvider(
-          create: (_) => CourseProvider(
-            CourseRepository(CourseService()),
-          )..loadCourses(),
-        ),
+        create: (_) => CourseProvider(
+          CourseRepository(
+            CourseApiService('https://jsonplaceholder.typicode.com'),
+          ),
+        )..loadCourses(),
+      ),
       ],
       child: const MyApp(),
     ),
