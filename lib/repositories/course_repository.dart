@@ -1,8 +1,8 @@
 import '../models/course.dart';
-import '../services/course_api_service.dart';
+import '../services/course_data_source.dart';
 
 class CourseRepository {
-  final CourseApiService service;
+  final CourseDataSource service;
 
   CourseRepository(this.service);
 
