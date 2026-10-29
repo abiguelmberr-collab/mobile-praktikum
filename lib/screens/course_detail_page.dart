@@ -20,7 +20,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   @override
   Widget build(BuildContext context) {
     final course = widget.course;
-    final code = course['code'] as String;
+    final code = course['code']?.toString() ?? '';
     final isFavorite =
         context.watch<CourseState>().favorites.contains(code);
 
@@ -58,7 +58,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              course['title'] as String,
+              course['title']?.toString() ?? 'Tanpa Judul',
               style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,

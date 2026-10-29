@@ -633,6 +633,7 @@ class _CoursesPageState extends State<CoursesPage> {
                   'title': course.title,
                   'credits': course.credits,
                   'status': course.status,
+                  'description': '',
                 };
               }).toList();
 

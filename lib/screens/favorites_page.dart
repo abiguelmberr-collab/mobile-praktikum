@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../course_state.dart';
-import '../data/courses.dart';
+import '../providers/course_provider.dart';
 import '../widgets/course_card.dart';
 import 'course_detail_page.dart';
 
@@ -13,10 +13,38 @@ class FavoritesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final courseState = context.watch<CourseState>();
+    final courseProvider = context.watch<CourseProvider>();
 
-    final favoriteCourses = courses.where((course) {
-      return courseState.isFavorite(course['code'] as String);
+    final favoriteCourses = courseProvider.courses.where((course) {
+      return courseState.isFavorite(course.code);
     }).toList();
+
+    if (courseProvider.isLoading && courseProvider.courses.isEmpty) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (courseProvider.error != null &&
+        courseProvider.courses.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Course Favorit')),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Gagal memuat course favorit.'),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () =>
+                    context.read<CourseProvider>().loadCourses(),
+                child: const Text('Coba Lagi'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -31,20 +59,31 @@ class FavoritesPage extends StatelessWidget {
               itemCount: favoriteCourses.length,
               itemBuilder: (context, index) {
                 final course = favoriteCourses[index];
-                final code = course['code'] as String;
 
                 return CourseCard(
-                  course: course,
-                  isFavorite: courseState.isFavorite(code),
+                  course: {
+                    'code': course.code,
+                    'title': course.title,
+                    'credits': course.credits,
+                    'status': course.status,
+                  },
+                  isFavorite: courseState.isFavorite(course.code),
                   onFavorite: () {
-                    context.read<CourseState>().toggleFavorite(code);
+                    context
+                        .read<CourseState>()
+                        .toggleFavorite(course.code);
                   },
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => CourseDetailPage(
-                          course: course,
+                          course: {
+                            'code': course.code,
+                            'title': course.title,
+                            'credits': course.credits,
+                            'status': course.status,
+                          },
                         ),
                       ),
                     );
@@ -56,4 +95,3 @@ class FavoritesPage extends StatelessWidget {
     );
   }
 }
-
