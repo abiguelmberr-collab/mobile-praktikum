@@ -4,17 +4,13 @@ import 'package:provider/provider.dart';
 
 import 'course_state.dart';
 import 'screens/course_form_page.dart';
-import 'models/course.dart';
 
 import 'widgets/course_card.dart';
-
-import 'data/courses.dart';
 
 import 'screens/favorites_page.dart';
 
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
-import 'services/course_api_service.dart';
 
 import 'test_api.dart';
 import 'widgets/api_courses_section.dart';
@@ -22,7 +18,9 @@ import 'widgets/api_courses_section.dart';
 import 'widgets/error_view.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'config/supabase_config.dart';
+import 'services/course_supabase_service.dart';
 
 const String studentName = 'Made Gatan Pytrhsno Penar';
 
@@ -41,11 +39,9 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => CourseState()),
         ChangeNotifierProvider(
-          create: (_) => CourseProvider(
-            CourseRepository(
-              CourseApiService('https://jsonplaceholder.typicode.com'),
-            ),
-          )..loadCourses(),
+          create: (_) =>
+              CourseProvider(CourseRepository(CourseSupabaseService()))
+                ..loadCourses(),
         ),
       ],
       child: const MyApp(),
@@ -225,7 +221,19 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final firstCourse = Course.fromJson(courses.first);
+    final courseProvider = context.watch<CourseProvider>();
+    final courseList = courseProvider.courses.map((course) {
+      return <String, dynamic>{
+        'id': course.id,
+        'code': course.code,
+        'title': course.title,
+        'credits': course.credits,
+        'status': course.status,
+        'description': '',
+      };
+    }).toList();
+
+    final firstCourse = courseList.isNotEmpty ? courseList.first : null;
     final size = MediaQuery.of(context).size;
 
     final orientation = MediaQuery.of(context).orientation;
@@ -252,15 +260,25 @@ class HomePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
 
               children: [
-                Card(
-                  child: ListTile(
-                    title: Text(firstCourse.title),
-                    subtitle: Text(
-                      '${firstCourse.code} • ${firstCourse.credits} SKS • ${firstCourse.status}',
+                if (courseProvider.isLoading)
+                  const Center(child: CircularProgressIndicator())
+                else if (courseProvider.error != null)
+                  Text('Gagal memuat course: ${courseProvider.error}')
+                else if (firstCourse != null)
+                  Card(
+                    child: ListTile(
+                      title: Text(firstCourse['title'] as String),
+                      subtitle: Text(
+                        '${firstCourse['code']} • '
+                        '${firstCourse['credits']} SKS • '
+                        '${firstCourse['status']}',
+                      ),
                     ),
-                  ),
-                ),
+                  )
+                else
+                  const Text('Belum ada course dari Supabase.'),
 
+                // Widget Homepage lainnya tetap di bawah sini.
                 // =========================
 
                 // PROFILE
@@ -511,7 +529,7 @@ class HomePage extends StatelessWidget {
 
                 const SizedBox(height: 8),
 
-                for (final course in courses.take(3))
+                for (final course in courseList.take(3))
                   CourseCard(
                     course: course,
 
