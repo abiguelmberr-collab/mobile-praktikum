@@ -1,4 +1,3 @@
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/course.dart';
@@ -9,10 +8,7 @@ class CourseSupabaseService implements CourseDataSource {
 
   @override
   Future<List<Course>> getCourses() async {
-    final data = await supabase
-        .from('courses')
-        .select()
-        .order('id');
+    final data = await supabase.from('courses').select().order('id');
 
     return (data as List)
         .map((e) => Course.fromJson(e as Map<String, dynamic>))
@@ -36,8 +32,16 @@ class CourseSupabaseService implements CourseDataSource {
   }
 
   @override
-  Future<void> updateCourse(int id, Course course) {
-    throw UnimplementedError();
+  Future<void> updateCourse(int id, Course course) async {
+    await supabase
+        .from('courses')
+        .update({
+          'code': course.code,
+          'title': course.title,
+          'credits': course.credits,
+          'status': course.status,
+        })
+        .eq('id', id);
   }
 
   @override
