@@ -21,11 +21,21 @@ import 'widgets/api_courses_section.dart';
 
 import 'widgets/error_view.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'config/supabase_config.dart';
+
 const String studentName = 'Made Gatan Pytrhsno Penar';
 
 const String studentId = '2415051118';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: SupabaseConfig.projectUrl,
+    publishableKey: SupabaseConfig.publishableKey,
+  );
+
   runApp(
     MultiProvider(
       providers: [
